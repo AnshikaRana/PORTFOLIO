@@ -114,6 +114,10 @@ function openItem(kind,key){
     ? '<h5>From the demo</h5><div class="certs">'+
       o.shots.map(([src,cap])=>`<figure class="certfig"><img src="${src}" alt="${esc(cap)}" loading="lazy"><figcaption>${esc(cap)}</figcaption></figure>`).join('')+
       '</div>' : '';
+  // what a submitted paper concluded, each paragraph led by its finding in bold
+  const res = o.findings&&o.findings.length
+    ? '<h5>What the paper found</h5>'+o.findings.map(p=>{const k=p.indexOf('. ');
+        return `<p class="para"><b>${esc(p.slice(0,k+1))}</b> ${esc(p.slice(k+2))}</p>`;}).join('') : '';
   // the project built during an internship
   const proj = o.project
     ? `<h5>Project from this internship</h5><h4 class="pjt">${esc(o.project.title)}</h4>`+
@@ -126,7 +130,7 @@ function openItem(kind,key){
     `<p class="tag">${esc(o.kind)}</p><h3>${esc(o.title)}</h3><p class="sub">${esc(o.meta)}</p>`+
     `<p class="brief">${esc(o.lead)}</p>`+
     (o.body||[]).map(p=>`<p class="para">${esc(p)}</p>`).join('')+
-    stats(o.figs)+proj+team+mine+shots+deck+cert+linkrow(o.links)+note(o.check));
+    res+stats(o.figs)+proj+team+mine+shots+deck+cert+linkrow(o.links)+note(o.check));
 }
 function openCourse(code,name,grade){
   const c=COURSES[code];

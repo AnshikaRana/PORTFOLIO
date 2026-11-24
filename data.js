@@ -119,16 +119,24 @@ const RESEARCH = {
   },
   crop: {
     title:"Early Crop Type Classification",
-    kind:"Model lead",
-    meta:"Minor Project · B.Tech CSE (AI), IGDTUW · supervised by Dr. Himanshu Mittal · team of five · manuscript in preparation",
-    lead:"Naming the crop growing in a field from Sentinel-2 time series as early in the season as possible, months before the plant is visibly itself.",
+    kind:"First author",
+    meta:"Minor Project · B.Tech CSE (AI), IGDTUW · supervised by Dr. Himanshu Mittal · team of five · submitted to EmergIN 2027",
+    lead:"Naming the crop growing in a field from Sentinel-2 time series as early in the season as possible, and knowing which of those early answers can be trusted.",
     body:[
-      "Full working title: Enhanced Early Crop Type Classification via Dual-Branch Cross-Attention and Rotation-Aware Adaptive Gating. The baseline is Gené-Mola et al., Computers and Electronics in Agriculture, 2026, reproduced faithfully rather than quoted.",
-      "Data is CatCrops over Lleida in Catalonia: trained on 2022, tested on the following year, 18 crop classes, 264,535 field-seasons in all. Each field is 12 channels per satellite pass, ten bands plus cloud probability and the day of the year, up to 144 passes.",
-      "The baseline folds the static facts about a field into the time series as extra time steps. The proposal splits them out: a transformer over the satellite series in one branch, elevation, slope, irrigation system and municipality in another, joined by cross-attention and FiLM. A rotation-aware gate then decides how much to trust last year\u0027s crop, lowering its weight when this season\u0027s signal has already diverged from it.",
-      "Four runs, each adding one component to the one before, three seeds each, evaluated at four points in the season: 1 March, 1 June, 1 September and 1 December. The manuscript is in preparation."
+      "Paper: Early Crop Type Classification via Dual-Branch Cross-Attention and Rotation-Aware Adaptive Gating. Submitted to EmergIN 2027, the 3rd International Conference on Emerging Technologies and Innovation for Sustainability, NIET Greater Noida, 5 to 6 February 2027.",
+      "Early in the season few cloud-free Sentinel-2 observations exist, so models lean on last year's crop, which differs from this year's for about a quarter of fields. The baseline is Gené-Mola et al., Computers and Electronics in Agriculture, 2026, on the CatCrops dataset over Lleida in Catalonia: 18 crop classes, each field a series of 12 channels per satellite pass.",
+      "The proposal splits the static facts about a field out of the time series: a transformer over the satellite series in one branch, elevation, slope, irrigation system and municipality in another, joined by cross-attention and FiLM. A rotation-aware gate scales last year's crop by how far this season's spectra have already diverged from it, and a class-balanced focal loss addresses the rare crops.",
+      "Four runs, each adding one component to the one before (A baseline, B fusion, C gate, D focal loss), three seeds each, with model selection on 2022 only and testing on all 137,055 fields of 2023 at 1 March, 1 June, 1 September and 1 December."
     ],
-    figs:[["264,535","field-seasons"],["18","crop classes"],["4×3","runs by seeds"],["4","dates in the season"]],
+    findings:[
+      "A leakage-free baseline. Reproduced with model selection on 2022 only, the baseline matches the published late-season accuracy but sits 2 to 3 points below the published early-season figures (0.786 and 0.831 against 0.81 and 0.86 on 1 March and 1 June). The original study used the 2023 test fields for early stopping, the likely cause, so the paper reports these as leakage-free reference values.",
+      "Equal accuracy early, with confidence that can be trusted. On 1 March and 1 June the full model is as accurate as the baseline (+0.005 and \u22120.002), but its expected calibration error is 61% and 63% lower (0.074 to 0.029, and 0.052 to 0.019), and every seed of the full model is below every seed of the baseline. The baseline is overconfident: fields it predicts with 0.8 to 0.9 confidence on 1 March are right only 69% of the time.",
+      "Rare crops. Rare-crop F1 is 5.5 times higher on 1 March and 2.4 times higher on 1 June (0.008 to 0.044, and 0.034 to 0.083), with all five rare classes improving on both dates, although the absolute values remain low for every model.",
+      "What each part does. The ablation attributes the calibration and rare-crop gains mainly to the class-balanced focal loss. The rotation gate responds to crop change in the intended direction, separating rotated from unchanged fields with an AUROC of 0.81 on 1 March, but the classifier's own probability for last year's crop already separates them better (0.91), so the gate adds no accuracy.",
+      "Where the baseline wins. From 1 September the baseline is more accurate by 0.023 to 0.030, and about 70% of its additional correct fields are fields whose crop changed since the previous year, which points to the fusion step as the source of the gap.",
+      "Conclusion. The paper recommends the proposed model for in-season maps, where calibrated confidence decides which fields can be accepted early and which should wait for more observations, and the baseline for final end-of-season maps. The full model also trains in about 40% less time per run, 50 instead of 82 minutes on a 4 GB laptop GPU. The findings come from one region, one pair of years and three seeds; future work will test a scaled encoding of static attributes, multi-year rotation histories and date-dependent calibration."
+    ],
+    figs:[["61\u201363%","lower calibration error, 1 March and 1 June"],["5.5\u00d7","rare-crop F1 on 1 March"],["0.81","AUROC of the rotation gate"],["40%","less training time per run"]],
     team:["Anshika Rana · model: baseline reproduction, both branches, fusion",
           "Ishu · data: CatCrops acquisition, preparation, day-of-year cropping",
           "Deepasha · rotation gate, class-balanced focal loss, trainer foundation",
